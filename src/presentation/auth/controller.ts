@@ -1,3 +1,4 @@
+import { LoginUserDto } from '@domain/dtos/auth/login-user.dto'
 import { RegisterUserDto } from '@domain/dtos/auth/register-user.dto'
 import { CustomError } from '@domain/errors/custom.error'
 import { AuthService } from '@presentation/services/auth.service'
@@ -7,7 +8,7 @@ export class AuthController {
 
 
     private handlerError = (error: unknown, res: Response) => {
-        if (error instanceof CustomError) return res.status(error.statusCode).json(error.message);
+        if (error instanceof CustomError) return res.status(error.statusCode).json({ error: error.message });
         return res.status(500).json(`${error}`)
     }
 
@@ -21,7 +22,11 @@ export class AuthController {
     }
 
     login = (req: Request, res: Response) => {
-
+        const [error, dto] = LoginUserDto.create(req.body)
+        if (error) return res.status(400).json({ error });
+        this.authService.loginUser(dto!)
+            .then(user => res.json(user))
+            .catch(error => this.handlerError(error, res))
     }
 
     validateEmail = (req: Request, res: Response) => {
