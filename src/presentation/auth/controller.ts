@@ -30,6 +30,12 @@ export class AuthController {
     }
 
     validateEmail = (req: Request, res: Response) => {
+        const token = Array.isArray(req.params.token) ? req.params.token[0] : req.params.token //-> para tipado estricto
+        // const { token } = req.params //-> valido
+        if (!token) return res.status(400).json({ error: "Token is required" })
+        this.authService.validateEmail(token)
+            .then(() => res.json("Email Validate"))
+            .catch(error => this.handlerError(error, res))
 
     }
 

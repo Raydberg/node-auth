@@ -11,7 +11,7 @@ export class Jwt {
     static generateToken(
         payload: any,
         duration: NonNullable<SignOptions["expiresIn"]> = "2h"
-    ) {
+    ): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             jwt.sign(
                 payload,
@@ -25,10 +25,14 @@ export class Jwt {
         });
     }
 
-    static validateToken = (token: string): void => {
-        throw new Error("Not implement")
+    static validateToken = (token: string): Promise<unknown> => {
+        return new Promise((resolve) => {
+            jwt.verify(token, JWT_SEED, (err, decoded) => {
+                if (err) return resolve(null)
+                resolve(decoded)
+            })
+        })
 
-        return;
     }
 
 }

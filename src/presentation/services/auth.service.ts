@@ -55,6 +55,19 @@ export class AuthService {
         }
     }
 
+    async validateEmail(token: string):Promise<boolean> {
+        const payload = await Jwt.validateToken(token)
+        if (!payload) throw CustomError.unauthorized("Invalid Token");
+
+        const { email } = payload as { email: string };
+        if (!email) throw CustomError.internalServer("Email not in token");
+        const user = await UserModel.findOne({ email })
+        if (!user) throw CustomError.internalServer("Email not exist");
+        user.emailValidated = true
+        await user.save()
+        return true;
+    }
+
     private sendEmailValidationLink = async (email: string) => {
         const token = await Jwt.generateToken({ email });
         if (!token) throw CustomError.internalServer("Error getting doing");
