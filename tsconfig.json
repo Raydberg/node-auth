@@ -18,6 +18,20 @@
     "lib": [
       "esnext"
     ],
+    "paths": {
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@data/*": [
+        "./src/data/*"
+      ],
+      "@domain/*": [
+        "./src/domain/*"
+      ],
+      "@presentation/*": [
+        "./src/presentation/*"
+      ]
+    },
     "moduleResolution": "node",
     "sourceMap": true,
     "declaration": true,
