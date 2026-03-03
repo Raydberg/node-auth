@@ -1,4 +1,5 @@
 import { CreateCategoryDto } from "@domain/dtos/categories/create-category.dto";
+import { PaginationDto } from "@domain/dtos/shared/paginate.dto";
 import { CustomError } from "@domain/errors/custom.error";
 import { CategoryService } from "@presentation/services/category.service";
 
@@ -13,7 +14,12 @@ export class CategoryController {
     }
 
     getCategories = async (req: Request, res: Response) => {
-        this.categoryService.getCategories()
+
+        const { page = 1, limit = 10 } = req.query
+
+        const [error, paginationDto] = PaginationDto.create(+page, +limit)
+        if (error) throw res.status(400).json({ error })
+        this.categoryService.getCategories(paginationDto!)
             .then(category => res.status(200).json(category))
             .catch(error => this.handlerError(error, res))
     }

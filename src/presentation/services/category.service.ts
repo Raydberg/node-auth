@@ -1,16 +1,47 @@
 import { CategoryModel } from "@data/mongo/models/category.model";
 import { CreateCategoryDto } from "@domain/dtos/categories/create-category.dto";
+import { PaginationDto } from "@domain/dtos/shared/paginate.dto";
 import { UserEntity } from "@domain/entities/user.entity";
 import { CustomError } from "@domain/errors/custom.error";
 
 export class CategoryService {
 
-    async getCategories() {
+    async getCategories(paginationDto: PaginationDto) {
         // const categories = await CategoryModel.find()
+        const { page, limit } = paginationDto
         try {
-            return (await CategoryModel.find().select('_id name available').lean()).map(({ _id, name, available }) => ({ id: _id, name, available }))            // return categories.map(({ id, name, available }) => ({ id, name, available }))
+            const [total, categories] = await Promise.all([
+                CategoryModel.countDocuments(),
+                CategoryModel.find()
+                    .skip((page - 1) * limit)
+                    .limit(limit)
+                    .select('_id name available')
+                    .lean()
+            ])
+            // const total = await CategoryModel.countDocuments()
+            // const categories = (
+            //     await CategoryModel.find()
+            //         .skip((page - 1) * limit)
+            //         .limit(limit)
+            //         .select('_id name available')
+            //         .lean()
+            // ).map(({ _id, name, available }) => ({ id: _id, name, available }))            
+            // return categories.map(({ id, name, available }) => ({ id, name, available }))
+
+            const mappedCategories = categories.map(({ _id, name, available }) => ({
+                id: _id.toString(),
+                name,
+                available,
+            }))
+
+            return {
+                page,
+                limit,
+                total,
+                categories: mappedCategories,
+            }
         } catch (error) {
-            throw CustomError.internalServer
+            throw CustomError.internalServer(`${error}`)
         }
     }
 
